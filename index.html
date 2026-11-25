@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spacing Scale Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --border: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --text: #18181b;
+    --text-2: #52525b;
+    --text-3: #6b6b74;
+    --accent: #0b63ce;
+    --accent-hover: #0a56b3;
+    --accent-soft: #e8f1fd;
+    --bar: #4f8ff7;
+    --bar-track: #f1f1f4;
+    --error: #b42318;
+    --error-soft: #fef3f2;
+    --warn: #8a5a00;
+    --warn-soft: #fff8e6;
+    --code-bg: #fafafa;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --focus: 0 0 0 3px rgba(11, 99, 206, .35);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  header.app {
+    max-width: 1200px; margin: 0 auto; padding: 24px 24px 8px;
+  }
+  header.app h1 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  header.app p { margin: 4px 0 0; color: var(--text-2); }
+
+  main {
+    max-width: 1200px; margin: 0 auto; padding: 16px 24px 40px;
+    display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; align-items: start;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .controls { padding: 4px 0; position: sticky; top: 16px; }
+  .section { padding: 16px 20px; border-top: 1px solid var(--border); }
+  .section:first-child { border-top: 0; }
+  .section-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--text-3); margin: 0 0 10px;
+  }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { padding: 0; }
+  label, .label { font-weight: 500; font-size: 13px; color: var(--text); }
+  .hint { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+
+  /* Segmented control (radio-based) */
+  .seg {
+    display: flex; background: var(--bar-track); border-radius: var(--radius-sm); padding: 3px; gap: 2px;
+  }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label {
+    flex: 1; text-align: center; padding: 7px 8px; border-radius: 6px; cursor: pointer;
+    font-weight: 500; color: var(--text-2); user-select: none; transition: background .15s, color .15s;
+    min-height: 34px; display: flex; align-items: center; justify-content: center;
+  }
+  .seg label:hover { color: var(--text); }
+  .seg input:checked + label {
+    background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04);
+  }
+  .seg input:focus-visible + label { box-shadow: var(--focus); }
+
+  .field { margin-top: 12px; }
+  .field:first-child { margin-top: 0; }
+  .field > label { display: block; margin-bottom: 6px; }
+  .input-wrap { position: relative; display: flex; align-items: center; }
+  input[type="number"], input[type="text"] {
+    width: 100%; font: inherit; color: var(--text);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    padding: 8px 10px; min-height: 36px; background: var(--card);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .input-wrap .unit {
+    position: absolute; right: 10px; color: var(--text-3); font-size: 13px; pointer-events: none;
+  }
+  .input-wrap input { padding-right: 34px; }
+  input:hover { border-color: #a1a1aa; }
+  input:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus); }
+  input[aria-invalid="true"] { border-color: var(--error); }
+  input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px rgba(180, 35, 24, .25); }
+
+  .error {
+    display: none; margin-top: 6px; font-size: 12px; color: var(--error);
+    background: var(--error-soft); border-radius: 6px; padding: 6px 8px;
+  }
+  .error.show { display: block; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .chip {
+    font: inherit; font-size: 12px; font-weight: 500; color: var(--text-2);
+    background: var(--card); border: 1px solid var(--border-strong); border-radius: 999px;
+    padding: 5px 10px; cursor: pointer; min-height: 30px;
+  }
+  .chip:hover { border-color: #a1a1aa; color: var(--text); }
+  .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .chip:focus-visible { outline: none; box-shadow: var(--focus); }
+  .chip small { color: var(--text-3); font-weight: 400; margin-left: 3px; }
+  .chip[aria-pressed="true"] small { color: var(--accent); }
+
+  .range-row { display: flex; align-items: center; gap: 12px; }
+  input[type="range"] { flex: 1; accent-color: var(--accent); min-height: 30px; }
+  input[type="range"]:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 4px; }
+  .range-value {
+    min-width: 36px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums;
+    background: var(--bar-track); border-radius: 6px; padding: 4px 6px;
+  }
+  .range-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+
+  [hidden] { display: none !important; }
+
+  /* Preview */
+  .right { display: grid; gap: 16px; min-width: 0; }
+  .preview-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+  }
+  .preview-head h2, .export-head h2 { font-size: 14px; font-weight: 600; margin: 0; }
+  .summary { color: var(--text-3); font-size: 12px; }
+  .notice {
+    margin: 12px 20px 0; font-size: 12px; border-radius: 6px; padding: 8px 10px;
+  }
+  .notice.warn { background: var(--warn-soft); color: var(--warn); }
+  .notice.stale { background: var(--error-soft); color: var(--error); }
+
+  .scale { list-style: none; margin: 0; padding: 8px 0; transition: opacity .15s; }
+  .scale.is-stale { opacity: .45; }
+  .row {
+    display: grid; grid-template-columns: 84px minmax(0, 1fr) 64px 78px; gap: 12px; align-items: center;
+    padding: 9px 20px;
+  }
+  .row + .row { border-top: 1px solid #f4f4f5; }
+  .token { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 500; }
+  .track { height: 20px; display: flex; align-items: center; min-width: 0; }
+  .bar {
+    height: 20px; background: var(--bar); border-radius: 3px; min-width: 1px;
+    transition: width .2s ease;
+  }
+  .px, .rem { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .px { font-weight: 500; }
+  .rem { color: var(--text-2); }
+  .scale-cols {
+    display: grid; grid-template-columns: 84px minmax(0, 1fr) 64px 78px; gap: 12px;
+    padding: 12px 20px 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3);
+  }
+  .scale-cols span:nth-child(n+3) { text-align: right; }
+  .scaled-note { padding: 0 20px 14px; font-size: 12px; color: var(--text-3); }
+
+  /* Export */
+  .export-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 12px 12px 12px 20px; border-bottom: 1px solid var(--border);
+  }
+  .tabs { display: flex; gap: 2px; background: var(--bar-track); border-radius: var(--radius-sm); padding: 3px; }
+  .tab {
+    font: inherit; font-weight: 500; color: var(--text-2); background: transparent; border: 0;
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; min-height: 32px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab[aria-selected="true"] { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04); }
+  .tab:focus-visible { outline: none; box-shadow: var(--focus); }
+  .export-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0;
+    border-radius: var(--radius-sm); padding: 8px 16px; min-height: 36px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; transition: background .15s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:focus-visible { outline: none; box-shadow: var(--focus); }
+  .btn:disabled { background: #a1a1aa; cursor: not-allowed; }
+  .btn.copied { background: #137333; }
+  pre {
+    margin: 0; padding: 16px 20px; background: var(--code-bg); overflow: auto; max-height: 360px;
+    border-radius: 0 0 var(--radius) var(--radius);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; line-height: 1.6;
+    color: #27272a; tab-size: 2;
+  }
+  pre:focus-visible { outline: none; box-shadow: inset var(--focus); }
+
+  @media (max-width: 767px) {
+    header.app { padding: 20px 16px 4px; }
+    main { grid-template-columns: 1fr; padding: 12px 16px 32px; }
+    .controls { position: static; }
+    .section { padding: 16px; }
+    .preview-head, .scale-cols, .row, .scaled-note { padding-left: 16px; padding-right: 16px; }
+    .row, .scale-cols { grid-template-columns: 70px minmax(0, 1fr) 46px 64px; gap: 8px; }
+    .export-head { padding: 12px 16px; }
+    .export-actions { width: 100%; justify-content: space-between; }
+    pre { padding: 14px 16px; }
+    .notice { margin-left: 16px; margin-right: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<header class="app">
+  <h1>Spacing Scale Generator</h1>
+  <p>Build a consistent spacing system, then copy it as CSS, Tailwind or JSON.</p>
+</header>
+
+<main>
+  <!-- Controls -->
+  <form class="card controls" id="controls" aria-label="Scale settings" novalidate onsubmit="return false">
+    <div class="section">
+      <fieldset>
+        <legend class="section-title">Base unit</legend>
+        <div class="seg">
+          <input type="radio" name="base" id="base-4" value="4" checked><label for="base-4">4px</label>
+          <input type="radio" name="base" id="base-8" value="8"><label for="base-8">8px</label>
+          <input type="radio" name="base" id="base-custom" value="custom"><label for="base-custom">Custom</label>
+        </div>
+        <div class="field" id="base-custom-field" hidden style="margin-top:12px">
+          <label for="base-input">Custom base</label>
+          <div class="input-wrap">
+            <input type="number" id="base-input" inputmode="decimal" min="1" max="64" step="1" value="6" aria-describedby="base-error">
+            <span class="unit" aria-hidden="true">px</span>
+          </div>
+          <div class="error" id="base-error" role="alert"></div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="section">
+      <fieldset>
+        <legend class="section-title">Scale type</legend>
+        <div class="seg">
+          <input type="radio" name="type" id="type-linear" value="linear" checked><label for="type-linear">Linear</label>
+          <input type="radio" name="type" id="type-mult" value="multiplier"><label for="type-mult">Multiplier</label>
+          <input type="radio" name="type" id="type-custom" value="custom"><label for="type-custom">Custom</label>
+        </div>
+        <p class="hint" id="type-hint">Each step adds one base unit: 4, 8, 12, 16…</p>
+      </fieldset>
+
+      <div class="field" id="ratio-field" hidden style="margin-top:14px">
+        <label for="ratio-input">Ratio</label>
+        <div class="chips" role="group" aria-label="Ratio presets">
+          <button type="button" class="chip" data-ratio="1.25">1.25<small>Major third</small></button>
+          <button type="button" class="chip" data-ratio="1.333">1.333<small>Fourth</small></button>
+          <button type="button" class="chip" data-ratio="1.5">1.5<small>Fifth</small></button>
+          <button type="button" class="chip" data-ratio="1.618">1.618<small>Golden</small></button>
+          <button type="button" class="chip" data-ratio="2">2<small>Double</small></button>
+        </div>
+        <input type="number" id="ratio-input" inputmode="decimal" min="1.05" max="4" step="0.01" value="1.5" aria-describedby="ratio-hint ratio-error">
+        <p class="hint" id="ratio-hint">Each step is the previous one × the ratio, rounded to whole pixels.</p>
+        <div class="error" id="ratio-error" role="alert"></div>
+      </div>
+
+      <div class="field" id="custom-field" hidden style="margin-top:14px">
+        <label for="custom-input">Multipliers of base</label>
+        <input type="text" id="custom-input" value="0.5, 1, 1.5, 2, 3, 4, 6, 8" autocomplete="off" spellcheck="false" aria-describedby="custom-hint custom-error">
+        <p class="hint" id="custom-hint">Separate with commas. Each value is multiplied by the base unit.</p>
+        <div class="error" id="custom-error" role="alert"></div>
+      </div>
+    </div>
+
+    <div class="section" id="steps-section">
+      <div class="range-label-row">
+        <label for="steps-input">Number of steps</label>
+      </div>
+      <div class="range-row">
+        <input type="range" id="steps-input" min="6" max="12" step="1" value="8" aria-describedby="steps-hint">
+        <output class="range-value" id="steps-output" for="steps-input" aria-hidden="true">8</output>
+      </div>
+      <p class="hint" id="steps-hint">Between 6 and 12.</p>
+    </div>
+
+    <div class="section">
+      <div class="field">
+        <label for="root-input">Root font size <span style="font-weight:400;color:var(--text-3)">(for rem)</span></label>
+        <div class="input-wrap">
+          <input type="number" id="root-input" inputmode="decimal" min="4" max="32" step="1" value="16" aria-describedby="root-error">
+          <span class="unit" aria-hidden="true">px</span>
+        </div>
+        <div class="error" id="root-error" role="alert"></div>
+      </div>
+    </div>
+  </form>
+
+  <div class="right">
+    <!-- Preview -->
+    <section class="card" aria-labelledby="preview-title">
+      <div class="preview-head">
+        <h2 id="preview-title">Preview</h2>
+        <span class="summary" id="summary"></span>
+      </div>
+      <div class="notice stale" id="stale-notice" hidden>Fix the highlighted field to update the scale. Showing your last valid scale.</div>
+      <div class="notice warn" id="dupe-notice" hidden></div>
+      <div class="scale-cols" aria-hidden="true"><span>Token</span><span></span><span>px</span><span>rem</span></div>
+      <ul class="scale" id="scale" aria-label="Spacing scale"></ul>
+      <p class="scaled-note" id="scaled-note" hidden>Bars are scaled down to fit. Values shown are exact.</p>
+    </section>
+
+    <!-- Export -->
+    <section class="card" aria-labelledby="export-title">
+      <div class="export-head">
+        <h2 id="export-title">Export</h2>
+        <div class="export-actions">
+          <div class="tabs" role="tablist" aria-label="Export format">
+            <button type="button" class="tab" role="tab" id="tab-css" aria-controls="code" aria-selected="true" tabindex="0" data-format="css">CSS</button>
+            <button type="button" class="tab" role="tab" id="tab-tailwind" aria-controls="code" aria-selected="false" tabindex="-1" data-format="tailwind">Tailwind</button>
+            <button type="button" class="tab" role="tab" id="tab-json" aria-controls="code" aria-selected="false" tabindex="-1" data-format="json">JSON</button>
+          </div>
+          <button type="button" class="btn" id="copy-btn">Copy</button>
+        </div>
+      </div>
+      <pre id="code" role="tabpanel" aria-labelledby="tab-css" tabindex="0"></pre>
+    </section>
+  </div>
+</main>
+
+<div class="sr-only" aria-live="polite" id="live"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var els = {
+    form: $('controls'),
+    baseCustomField: $('base-custom-field'), baseInput: $('base-input'), baseError: $('base-error'),
+    typeHint: $('type-hint'),
+    ratioField: $('ratio-field'), ratioInput: $('ratio-input'), ratioError: $('ratio-error'),
+    customField: $('custom-field'), customInput: $('custom-input'), customError: $('custom-error'),
+    stepsSection: $('steps-section'), stepsInput: $('steps-input'), stepsOutput: $('steps-output'),
+    rootInput: $('root-input'), rootError: $('root-error'),
+    summary: $('summary'), scale: $('scale'), staleNotice: $('stale-notice'), dupeNotice: $('dupe-notice'),
+    scaledNote: $('scaled-note'), code: $('code'), copyBtn: $('copy-btn'), live: $('live')
+  };
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+
+  var MAX_PX = 4096;
+  var format = 'css';
+  var lastValid = null;   // { steps: [{name, px, rem}], root, summary }
+
+  // ---------- helpers ----------
+  function radioValue(name) {
+    var el = els.form.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : null;
+  }
+  function round(n, dp) {
+    var f = Math.pow(10, dp);
+    return Math.round((n + Number.EPSILON) * f) / f;
+  }
+  function fmt(n) { return String(round(n, 4)); }
+  function parseNum(str) {
+    var s = String(str).trim();
+    if (s === '' || !/^-?\d*\.?\d+$/.test(s)) return NaN;
+    return parseFloat(s);
+  }
+  function setError(input, errEl, msg) {
+    if (msg) {
+      errEl.textContent = msg;
+      errEl.classList.add('show');
+      input.setAttribute('aria-invalid', 'true');
+    } else {
+      errEl.textContent = '';
+      errEl.classList.remove('show');
+      input.removeAttribute('aria-invalid');
+    }
+  }
+
+  // ---------- read + validate ----------
+  function readBase() {
+    var choice = radioValue('base');
+    if (choice !== 'custom') { setError(els.baseInput, els.baseError, ''); return { value: +choice }; }
+    var raw = els.baseInput.value;
+    var v = parseNum(raw);
+    var msg = '';
+    if (String(raw).trim() === '') msg = 'Enter a base unit, for example 4 or 8.';
+    else if (isNaN(v)) msg = 'The base unit needs to be a number, like 6.';
+    else if (v < 1 || v > 64) msg = 'Pick a base unit between 1 and 64px.';
+    setError(els.baseInput, els.baseError, msg);
+    return msg ? { error: true } : { value: v };
+  }
+  function readRatio() {
+    var raw = els.ratioInput.value;
+    var v = parseNum(raw);
+    var msg = '';
+    if (String(raw).trim() === '') msg = 'Enter a ratio, or pick one of the presets.';
+    else if (isNaN(v)) msg = 'The ratio needs to be a number, like 1.5.';
+    else if (v < 1.05 || v > 4) msg = 'Use a ratio between 1.05 and 4. Smaller ratios repeat values; larger ones grow too fast.';
+    setError(els.ratioInput, els.ratioError, msg);
+    return msg ? { error: true } : { value: v };
+  }
+  function readCustom() {
+    var raw = els.customInput.value.trim();
+    var msg = '';
+    var values = [];
+    if (raw === '') {
+      msg = 'Add some multipliers, like 0.5, 1, 2, 3.';
+    } else {
+      var parts = raw.split(/[\s,]+/).filter(function (p) { return p !== ''; });
+      for (var i = 0; i < parts.length; i++) {
+        var n = parseNum(parts[i]);
+        if (isNaN(n)) { msg = '"' + parts[i] + '" isn’t a number. Use numbers separated by commas, like 1, 2, 3.'; break; }
+        if (n <= 0) { msg = 'Multipliers need to be greater than 0 (found ' + parts[i] + ').'; break; }
+        values.push(n);
+      }
+      if (!msg && values.length < 2) msg = 'Add at least 2 multipliers to make a scale.';
+      if (!msg && values.length > 20) msg = 'That’s ' + values.length + ' steps. Keep it to 20 or fewer.';
+    }
+    setError(els.customInput, els.customError, msg);
+    return msg ? { error: true } : { value: values };
+  }
+  function readRoot() {
+    var raw = els.rootInput.value;
+    var v = parseNum(raw);
+    var msg = '';
+    if (String(raw).trim() === '') msg = 'Enter a root font size. Browsers default to 16px.';
+    else if (isNaN(v)) msg = 'The root font size needs to be a number, like 16.';
+    else if (v < 4 || v > 32) msg = 'Pick a root font size between 4 and 32px.';
+    setError(els.rootInput, els.rootError, msg);
+    return msg ? { error: true } : { value: v };
+  }
+
+  // ---------- compute ----------
+  function compute() {
+    var type = radioValue('type');
+    var base = readBase();
+    var root = readRoot();
+    var ratio = type === 'multiplier' ? readRatio() : (setError(els.ratioInput, els.ratioError, ''), {});
+    var custom = type === 'custom' ? readCustom() : (setError(els.customInput, els.customError, ''), {});
+    var count = +els.stepsInput.value;
+
+    if (base.error || root.error || ratio.error || custom.error) return null;
+
+    var pxValues = [];
+    if (type === 'linear') {
+      for (var i = 1; i <= count; i++) pxValues.push(round(base.value * i, 2));
+    } else if (type === 'multiplier') {
+      for (var j = 0; j < count; j++) pxValues.push(Math.round(base.value * Math.pow(ratio.value, j)));
+    } else {
+      pxValues = custom.value.map(function (m) { return round(base.value * m, 2); });
+    }
+
+    var largest = Math.max.apply(null, pxValues);
+    if (largest > MAX_PX) {
+      var target = type === 'multiplier' ? els.ratioInput : (type === 'custom' ? els.customInput : els.baseInput);
+      var errEl = type === 'multiplier' ? els.ratioError : (type === 'custom' ? els.customError : els.baseError);
+      setError(target, errEl, 'This scale gets very large (' + fmt(largest) + 'px at the last step). Try a smaller ' +
+        (type === 'multiplier' ? 'ratio or fewer steps.' : 'value.'));
+      return null;
+    }
+
+    var steps = pxValues.map(function (px, idx) {
+      return { name: 'space-' + (idx + 1), px: px, rem: round(px / root.value, 4) };
+    });
+
+    var typeLabel = type === 'linear' ? 'Linear' : type === 'multiplier' ? 'Multiplier ×' + fmt(ratio.value) : 'Custom';
+    return {
+      steps: steps,
+      root: root.value,
+      summary: steps.length + ' steps · ' + fmt(base.value) + 'px base · ' + typeLabel
+    };
+  }
+
+  // ---------- render ----------
+  function renderScale(data) {
+    var track = els.scale.clientWidth;
+    // available bar width = row width minus padding, columns and gaps
+    var probe = els.scale.querySelector('.track');
+    var available = probe ? probe.clientWidth : Math.max(120, track - 300);
+    var max = Math.max.apply(null, data.steps.map(function (s) { return s.px; }));
+    var scaleFactor = max > available ? available / max : 1;
+
+    var frag = document.createDocumentFragment();
+    data.steps.forEach(function (s) {
+      var li = document.createElement('li');
+      li.className = 'row';
+      li.innerHTML =
+        '<span class="token"></span>' +
+        '<span class="track" aria-hidden="true"><span class="bar"></span></span>' +
+        '<span class="px"></span><span class="rem"></span>';
+      li.querySelector('.token').textContent = s.name;
+      li.querySelector('.px').textContent = fmt(s.px) + 'px';
+      li.querySelector('.rem').textContent = fmt(s.rem) + 'rem';
+      li.querySelector('.bar').style.width = Math.max(1, s.px * scaleFactor) + 'px';
+      li.setAttribute('aria-label', s.name + ': ' + fmt(s.px) + ' pixels, ' + fmt(s.rem) + ' rem');
+      frag.appendChild(li);
+    });
+    els.scale.innerHTML = '';
+    els.scale.appendChild(frag);
+    els.scaledNote.hidden = scaleFactor === 1;
+
+    // Re-measure once rows exist (first paint has no .track to probe)
+    if (!probe) requestAnimationFrame(function () { renderScale(data); });
+  }
+
+  function buildExport(data, fmtName) {
+    var s = data.steps;
+    if (fmtName === 'css') {
+      return ':root {\n' + s.map(function (x) {
+        return '  --' + x.name + ': ' + fmt(x.rem) + 'rem; /* ' + fmt(x.px) + 'px */';
+      }).join('\n') + '\n}';
+    }
+    if (fmtName === 'tailwind') {
+      return '// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      spacing: {\n' +
+        s.map(function (x) {
+          return "        '" + x.name + "': '" + fmt(x.rem) + "rem', // " + fmt(x.px) + 'px';
+        }).join('\n') + '\n      },\n    },\n  },\n};';
+    }
+    var obj = {};
+    s.forEach(function (x) { obj[x.name] = { px: x.px, rem: x.rem }; });
+    return JSON.stringify(obj, null, 2);
+  }
+
+  function renderExport() {
+    if (lastValid) els.code.textContent = buildExport(lastValid, format);
+  }
+
+  function checkDupes(data) {
+    var seen = {}, dupes = [];
+    data.steps.forEach(function (s) {
+      if (seen[s.px]) dupes.push(s.name); else seen[s.px] = true;
+    });
+    if (dupes.length) {
+      els.dupeNotice.textContent = 'Heads up: ' + dupes.join(', ') + (dupes.length > 1 ? ' repeat' : ' repeats') +
+        ' an earlier value after rounding. Try a larger ratio or base.';
+      els.dupeNotice.hidden = false;
+    } else {
+      els.dupeNotice.hidden = true;
+    }
+  }
+
+  function update() {
+    syncVisibility();
+    var data = compute();
+    if (data) {
+      lastValid = data;
+      els.summary.textContent = data.summary;
+      els.scale.classList.remove('is-stale');
+      els.staleNotice.hidden = true;
+      els.copyBtn.disabled = false;
+      checkDupes(data);
+      renderScale(data);
+      renderExport();
+    } else {
+      els.scale.classList.add('is-stale');
+      els.staleNotice.hidden = !lastValid;
+      els.dupeNotice.hidden = true;
+      els.copyBtn.disabled = true;
+    }
+  }
+
+  function syncVisibility() {
+    var base = radioValue('base');
+    var type = radioValue('type');
+    els.baseCustomField.hidden = base !== 'custom';
+    els.ratioField.hidden = type !== 'multiplier';
+    els.customField.hidden = type !== 'custom';
+    els.stepsSection.hidden = type === 'custom';
+    els.stepsOutput.textContent = els.stepsInput.value;
+
+    var b = base === 'custom' ? (parseNum(els.baseInput.value) || 'n') : +base;
+    var seq = typeof b === 'number' ? [1, 2, 3, 4].map(function (k) { return fmt(b * k); }).join(', ') : 'n, 2n, 3n, 4n';
+    els.typeHint.textContent =
+      type === 'linear' ? 'Each step adds one base unit: ' + seq + '…' :
+      type === 'multiplier' ? 'Each step grows by a ratio, for a scale that opens up at larger sizes.' :
+      'Choose your own multipliers of the base unit.';
+
+    var r = parseNum(els.ratioInput.value);
+    chips.forEach(function (c) { c.setAttribute('aria-pressed', String(+c.dataset.ratio === r)); });
+  }
+
+  // ---------- events ----------
+  els.form.addEventListener('input', update);
+  els.form.addEventListener('change', function (e) {
+    if (e.target.name === 'base' && e.target.value === 'custom') els.baseInput.focus();
+    update();
+  });
+  chips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      els.ratioInput.value = c.dataset.ratio;
+      update();
+    });
+  });
+
+  function selectTab(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    format = tab.dataset.format;
+    els.code.setAttribute('aria-labelledby', tab.id);
+    if (focus) tab.focus();
+    renderExport();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { selectTab(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var next = null;
+      if (e.key === 'ArrowRight') next = tabs[(i + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') next = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') next = tabs[0];
+      else if (e.key === 'End') next = tabs[tabs.length - 1];
+      if (next) { e.preventDefault(); selectTab(next, true); }
+    });
+  });
+
+  var copyTimer;
+  function copied(ok) {
+    clearTimeout(copyTimer);
+    var name = format === 'css' ? 'CSS variables' : format === 'tailwind' ? 'Tailwind config' : 'JSON';
+    if (ok) {
+      els.copyBtn.textContent = 'Copied ✓';
+      els.copyBtn.classList.add('copied');
+      els.live.textContent = name + ' copied to clipboard.';
+    } else {
+      els.copyBtn.textContent = 'Press Ctrl+C';
+      els.live.textContent = 'Couldn’t copy automatically. The code is selected; press Ctrl+C or Command+C to copy it.';
+      var range = document.createRange();
+      range.selectNodeContents(els.code);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    copyTimer = setTimeout(function () {
+      els.copyBtn.textContent = 'Copy';
+      els.copyBtn.classList.remove('copied');
+    }, 1800);
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed'; ta.style.top = '-1000px'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    els.copyBtn.focus();
+    return ok;
+  }
+  els.copyBtn.addEventListener('click', function () {
+    if (!lastValid || els.copyBtn.disabled) return;
+    var text = buildExport(lastValid, format);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { copied(true); }, function () { copied(fallbackCopy(text)); });
+    } else {
+      copied(fallbackCopy(text));
+    }
+  });
+
+  var resizeRaf;
+  window.addEventListener('resize', function () {
+    cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(function () { if (lastValid) renderScale(lastValid); });
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
