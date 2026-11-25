@@ -151,6 +151,11 @@
   .notice.warn { background: var(--warn-soft); color: var(--warn); }
   .notice.stale { background: var(--error-soft); color: var(--error); }
 
+  .grid-notice { background: var(--warn-soft); color: var(--warn); }
+  .row.off-grid { background: var(--warn-soft); box-shadow: inset 3px 0 0 #d97706; }
+  .row.off-grid .px { color: var(--warn); }
+  .row.off-grid .px::before { content: "\25CF"; font-size: 8px; vertical-align: 2px; margin-right: 4px; color: #d97706; }
+  .row.off-grid .bar { background: #f59e0b; }
   .scale { list-style: none; margin: 0; padding: 8px 0; transition: opacity .15s; }
   .scale.is-stale { opacity: .45; }
   .row {
@@ -158,7 +163,10 @@
     padding: 9px 20px;
   }
   .row + .row { border-top: 1px solid #f4f4f5; }
-  .token { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 500; }
+  .token {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
   .track { height: 20px; display: flex; align-items: center; min-width: 0; }
   .bar {
     height: 20px; background: var(--bar); border-radius: 3px; min-width: 1px;
@@ -173,6 +181,62 @@
   }
   .scale-cols span:nth-child(n+3) { text-align: right; }
   .scaled-note { padding: 0 20px 14px; font-size: 12px; color: var(--text-3); }
+
+  /* Example */
+  .ex-controls {
+    display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end;
+    padding: 16px 20px 0;
+  }
+  .ex-controls .field { margin: 0; flex: 1 1 140px; }
+  .ex-controls .field > label { margin-bottom: 4px; font-size: 12px; }
+  select {
+    width: 100%; font: inherit; color: var(--text); background: var(--card);
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    padding: 7px 8px; min-height: 36px;
+  }
+  select:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus); }
+  .check { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; font-size: 13px; font-weight: 500; }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
+  .ex-stage { padding: 16px 20px 20px; }
+  .ex-canvas {
+    background: var(--bg); border-radius: var(--radius-sm); padding: 24px; overflow: auto;
+  }
+  .ex-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--ex-gap); border-radius: 4px;
+  }
+  .ex-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 10px;
+    padding: var(--ex-pad); min-width: 0; transition: padding .2s ease;
+  }
+  .ex-body { display: flex; flex-direction: column; gap: var(--ex-inner); }
+  .ex-head { display: flex; align-items: center; gap: var(--ex-inner); }
+  .ex-icon {
+    width: 36px; height: 36px; border-radius: 8px; flex: none;
+    display: grid; place-items: center; font-weight: 600; font-size: 13px;
+  }
+  .ex-title { font-weight: 600; font-size: 14px; margin: 0; }
+  .ex-meta { font-size: 12px; color: var(--text-3); margin: 0; }
+  .ex-text { margin: 0; color: var(--text-2); font-size: 13px; }
+  .ex-tags { display: flex; flex-wrap: wrap; gap: var(--ex-inner); }
+  .ex-tag { font-size: 12px; font-weight: 500; background: var(--bar-track); color: var(--text-2); border-radius: 999px; padding: 2px 10px; }
+  .ex-actions { display: flex; flex-wrap: wrap; gap: var(--ex-inner); }
+  .ex-btn {
+    font: inherit; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: default;
+    padding: var(--ex-btn-y) var(--ex-btn-x); border: 1px solid var(--border-strong); background: #fff; color: var(--text);
+  }
+  .ex-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .ex-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px; font-size: 12px; color: var(--text-2); }
+  .ex-legend code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--text); }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .sw-pad { background: #86efac; } .sw-gap { background: #f9a8d4; } .sw-inner { background: #c4b5fd; }
+  .swatch { display: none; }
+  /* Spacing overlay: tint each kind of space so you can see it */
+  .show-spacing .swatch { display: inline-block; }
+  .show-spacing .ex-grid { background: #f9a8d4; }
+  .show-spacing .ex-card { background: #86efac; }
+  .show-spacing .ex-body, .show-spacing .ex-head, .show-spacing .ex-tags, .show-spacing .ex-actions { background: #c4b5fd; }
+  .show-spacing .ex-text, .show-spacing .ex-head > div { background: #fff; }
 
   /* Export */
   .export-head {
@@ -216,6 +280,10 @@
     .export-actions { width: 100%; justify-content: space-between; }
     pre { padding: 14px 16px; }
     .notice { margin-left: 16px; margin-right: 16px; }
+    .ex-controls { padding: 16px 16px 0; }
+    .ex-stage { padding: 16px; }
+    .ex-canvas { padding: 12px; }
+    .ex-grid { grid-template-columns: minmax(0, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; }
@@ -295,6 +363,29 @@
     </div>
 
     <div class="section">
+      <fieldset>
+        <legend class="section-title">Token names</legend>
+        <div class="seg">
+          <input type="radio" name="naming" id="naming-num" value="numbered" checked><label for="naming-num">1, 2, 3</label>
+          <input type="radio" name="naming" id="naming-tshirt" value="tshirt"><label for="naming-tshirt">xs, sm, md</label>
+          <input type="radio" name="naming" id="naming-custom" value="custom"><label for="naming-custom">Custom</label>
+        </div>
+      </fieldset>
+      <div class="field" id="names-field" hidden style="margin-top:12px">
+        <label for="names-input">Your names, smallest first</label>
+        <input type="text" id="names-input" autocomplete="off" spellcheck="false" aria-describedby="names-hint names-error">
+        <p class="hint" id="names-hint">Separate with commas, one name per step.</p>
+        <div class="error" id="names-error" role="alert"></div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label for="prefix-input">Prefix <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
+        <input type="text" id="prefix-input" value="space" autocomplete="off" spellcheck="false" aria-describedby="prefix-hint prefix-error">
+        <p class="hint" id="prefix-hint">Gives names like <code id="prefix-example">space-1</code>. Clear it for plain names like <code>md</code>.</p>
+        <div class="error" id="prefix-error" role="alert"></div>
+      </div>
+    </div>
+
+    <div class="section">
       <div class="field">
         <label for="root-input">Root font size <span style="font-weight:400;color:var(--text-3)">(for rem)</span></label>
         <div class="input-wrap">
@@ -314,10 +405,63 @@
         <span class="summary" id="summary"></span>
       </div>
       <div class="notice stale" id="stale-notice" hidden>Fix the highlighted field to update the scale. Showing your last valid scale.</div>
+      <div class="notice grid-notice" id="grid-notice" hidden><span id="grid-notice-text"></span></div>
       <div class="notice warn" id="dupe-notice" hidden></div>
       <div class="scale-cols" aria-hidden="true"><span>Token</span><span></span><span>px</span><span>rem</span></div>
       <ul class="scale" id="scale" aria-label="Spacing scale"></ul>
       <p class="scaled-note" id="scaled-note" hidden>Bars are scaled down to fit. Values shown are exact.</p>
+    </section>
+
+    <!-- Example -->
+    <section class="card" aria-labelledby="example-title" id="example">
+      <div class="preview-head">
+        <h2 id="example-title">In use</h2>
+        <span class="summary">Real cards spaced with your scale</span>
+      </div>
+      <div class="ex-controls">
+        <div class="field">
+          <label for="ex-pad-select">Card padding</label>
+          <select id="ex-pad-select"></select>
+        </div>
+        <div class="field">
+          <label for="ex-gap-select">Gap between cards</label>
+          <select id="ex-gap-select"></select>
+        </div>
+        <div class="field">
+          <label for="ex-inner-select">Gap inside cards</label>
+          <select id="ex-inner-select"></select>
+        </div>
+        <label class="check"><input type="checkbox" id="ex-overlay"> Show spacing</label>
+      </div>
+      <div class="ex-stage">
+        <div class="ex-canvas">
+          <div class="ex-grid" id="ex-grid">
+            <article class="ex-card" aria-label="Example card: Website redesign">
+              <div class="ex-body">
+                <div class="ex-head">
+                  <span class="ex-icon" style="background:#e8f1fd;color:#0b63ce" aria-hidden="true">WR</span>
+                  <div><p class="ex-title">Website redesign</p><p class="ex-meta">Updated 2 hours ago</p></div>
+                </div>
+                <p class="ex-text">New navigation and homepage layout are ready for review.</p>
+                <div class="ex-tags"><span class="ex-tag">Design</span><span class="ex-tag">In review</span></div>
+                <div class="ex-actions"><span class="ex-btn primary">Open</span><span class="ex-btn">Share</span></div>
+              </div>
+            </article>
+            <article class="ex-card" aria-label="Example card: Mobile app">
+              <div class="ex-body">
+                <div class="ex-head">
+                  <span class="ex-icon" style="background:#e7f6ec;color:#137333" aria-hidden="true">MA</span>
+                  <div><p class="ex-title">Mobile app</p><p class="ex-meta">Updated yesterday</p></div>
+                </div>
+                <p class="ex-text">Onboarding screens shipped to beta testers this week.</p>
+                <div class="ex-tags"><span class="ex-tag">Build</span><span class="ex-tag">Beta</span></div>
+                <div class="ex-actions"><span class="ex-btn primary">Open</span><span class="ex-btn">Share</span></div>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="ex-legend" id="ex-legend" aria-live="off"></div>
+      </div>
     </section>
 
     <!-- Export -->
@@ -353,6 +497,9 @@
     customField: $('custom-field'), customInput: $('custom-input'), customError: $('custom-error'),
     stepsSection: $('steps-section'), stepsInput: $('steps-input'), stepsOutput: $('steps-output'),
     rootInput: $('root-input'), rootError: $('root-error'),
+    namesField: $('names-field'), namesInput: $('names-input'), namesError: $('names-error'),
+    prefixInput: $('prefix-input'), prefixError: $('prefix-error'), prefixExample: $('prefix-example'),
+    gridNotice: $('grid-notice'), gridNoticeText: $('grid-notice-text'),
     summary: $('summary'), scale: $('scale'), staleNotice: $('stale-notice'), dupeNotice: $('dupe-notice'),
     scaledNote: $('scaled-note'), code: $('code'), copyBtn: $('copy-btn'), live: $('live')
   };
@@ -360,6 +507,7 @@
   var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
 
   var MAX_PX = 4096;
+  var GRID = 4;           // values that aren't multiples of this get highlighted
   var format = 'css';
   var lastValid = null;   // { steps: [{name, px, rem}], root, summary }
 
@@ -444,6 +592,53 @@
     return msg ? { error: true } : { value: v };
   }
 
+  // ---------- token names ----------
+  var NAME_RE = /^[A-Za-z0-9_-]+$/;
+  var namesEdited = false;   // has the user typed their own names yet?
+  var lastRawNames = [];     // names (without prefix) from the last valid scale
+
+  // xs, sm, md, lg, xl… with md roughly in the middle, extending to 2xs / 2xl etc.
+  function tshirtNames(n) {
+    var below = Math.floor((n - 1) / 2), above = n - 1 - below;
+    var small = [], large = [];
+    for (var i = 0; i < below; i++) small.unshift(i === 0 ? 'sm' : i === 1 ? 'xs' : (i) + 'xs');
+    for (var j = 0; j < above; j++) large.push(j === 0 ? 'lg' : j === 1 ? 'xl' : (j) + 'xl');
+    return small.concat(['md'], large);
+  }
+  function readPrefix() {
+    var v = els.prefixInput.value.trim();
+    var msg = '';
+    if (v !== '' && !/^[A-Za-z][A-Za-z0-9_-]*$/.test(v)) {
+      msg = 'Start the prefix with a letter and use only letters, numbers, - or _.';
+    }
+    setError(els.prefixInput, els.prefixError, msg);
+    return msg ? { error: true } : { value: v.replace(/-+$/, '') };
+  }
+  function readNames(count) {
+    var mode = radioValue('naming');
+    if (mode !== 'custom') {
+      setError(els.namesInput, els.namesError, '');
+      if (mode === 'tshirt') return { value: tshirtNames(count) };
+      var nums = [];
+      for (var i = 1; i <= count; i++) nums.push(String(i));
+      return { value: nums };
+    }
+    var parts = els.namesInput.value.split(',').map(function (p) { return p.trim(); }).filter(function (p) { return p !== ''; });
+    var msg = '', seen = {};
+    if (!parts.length) msg = 'Add a name for each step, like xs, sm, md, lg.';
+    for (var k = 0; !msg && k < parts.length; k++) {
+      if (!NAME_RE.test(parts[k])) msg = '"' + parts[k] + '" can only use letters, numbers, - or _ (no spaces).';
+      else if (seen[parts[k].toLowerCase()]) msg = '"' + parts[k] + '" is used twice. Each name needs to be different.';
+      seen[parts[k].toLowerCase()] = true;
+    }
+    if (!msg && parts.length !== count) {
+      msg = 'Your scale has ' + count + ' steps but you’ve named ' + parts.length + '. ' +
+        (parts.length < count ? 'Add ' + (count - parts.length) + ' more.' : 'Remove ' + (parts.length - count) + '.');
+    }
+    setError(els.namesInput, els.namesError, msg);
+    return msg ? { error: true } : { value: parts };
+  }
+
   // ---------- compute ----------
   function compute() {
     var type = radioValue('type');
@@ -455,14 +650,17 @@
 
     if (base.error || root.error || ratio.error || custom.error) return null;
 
+    // Every value is rounded to a whole pixel, whatever the scale type
     var pxValues = [];
     if (type === 'linear') {
-      for (var i = 1; i <= count; i++) pxValues.push(round(base.value * i, 2));
+      for (var i = 1; i <= count; i++) pxValues.push(Math.round(base.value * i));
     } else if (type === 'multiplier') {
       for (var j = 0; j < count; j++) pxValues.push(Math.round(base.value * Math.pow(ratio.value, j)));
     } else {
-      pxValues = custom.value.map(function (m) { return round(base.value * m, 2); });
+      pxValues = custom.value.map(function (m) { return Math.round(base.value * m); });
     }
+    // Rounding can produce 0 (e.g. 0.1 × 4px); the smallest useful step is 1px
+    pxValues = pxValues.map(function (px) { return Math.max(1, px); });
 
     var largest = Math.max.apply(null, pxValues);
     if (largest > MAX_PX) {
@@ -473,8 +671,19 @@
       return null;
     }
 
+    var prefix = readPrefix();
+    var names = readNames(pxValues.length);
+    if (prefix.error || names.error) return null;
+    lastRawNames = names.value;
+
     var steps = pxValues.map(function (px, idx) {
-      return { name: 'space-' + (idx + 1), px: px, rem: round(px / root.value, 4) };
+      var n = names.value[idx];
+      return {
+        name: prefix.value ? prefix.value + '-' + n : n,
+        px: px,
+        rem: round(px / root.value, 4),
+        offGrid: px % GRID !== 0
+      };
     });
 
     var typeLabel = type === 'linear' ? 'Linear' : type === 'multiplier' ? 'Multiplier ×' + fmt(ratio.value) : 'Custom';
@@ -503,10 +712,16 @@
         '<span class="track" aria-hidden="true"><span class="bar"></span></span>' +
         '<span class="px"></span><span class="rem"></span>';
       li.querySelector('.token').textContent = s.name;
+      li.querySelector('.token').title = s.name;
       li.querySelector('.px').textContent = fmt(s.px) + 'px';
       li.querySelector('.rem').textContent = fmt(s.rem) + 'rem';
       li.querySelector('.bar').style.width = Math.max(1, s.px * scaleFactor) + 'px';
-      li.setAttribute('aria-label', s.name + ': ' + fmt(s.px) + ' pixels, ' + fmt(s.rem) + ' rem');
+      if (s.offGrid) {
+        li.classList.add('off-grid');
+        li.querySelector('.px').title = 'Not a multiple of ' + GRID;
+      }
+      li.setAttribute('aria-label', s.name + ': ' + fmt(s.px) + ' pixels, ' + fmt(s.rem) + ' rem' +
+        (s.offGrid ? ', not a multiple of ' + GRID : ''));
       frag.appendChild(li);
     });
     els.scale.innerHTML = '';
@@ -516,6 +731,65 @@
     // Re-measure once rows exist (first paint has no .track to probe)
     if (!probe) requestAnimationFrame(function () { renderScale(data); });
   }
+
+  // ---------- example cards ----------
+  var ex = {
+    grid: $('ex-grid'), legend: $('ex-legend'), section: $('example'), overlay: $('ex-overlay'),
+    selects: { pad: $('ex-pad-select'), gap: $('ex-gap-select'), inner: $('ex-inner-select') },
+    targets: { pad: 24, gap: 16, inner: 8 },   // sensible defaults, matched to the nearest step
+    chosen: { pad: null, gap: null, inner: null } // step positions the user picked, so renaming keeps them
+  };
+  function closestStep(steps, target) {
+    return steps.reduce(function (best, s) {
+      return Math.abs(s.px - target) < Math.abs(best.px - target) ? s : best;
+    }, steps[0]);
+  }
+  function renderExample(data) {
+    var steps = data.steps;
+    var picked = {};
+    Object.keys(ex.selects).forEach(function (role) {
+      var sel = ex.selects[role];
+      var step = null;
+      if (ex.chosen[role] !== null) step = steps[ex.chosen[role]] || null;
+      if (!step) step = closestStep(steps, ex.targets[role]);
+      picked[role] = step;
+      sel.innerHTML = '';
+      steps.forEach(function (s, idx) {
+        var opt = document.createElement('option');
+        opt.value = String(idx);
+        opt.textContent = s.name + ' · ' + fmt(s.px) + 'px';
+        sel.appendChild(opt);
+      });
+      sel.value = String(steps.indexOf(step));
+    });
+    var btnY = closestStep(steps, 8), btnX = closestStep(steps, 16);
+    var g = ex.grid.style;
+    g.setProperty('--ex-pad', picked.pad.px + 'px');
+    g.setProperty('--ex-gap', picked.gap.px + 'px');
+    g.setProperty('--ex-inner', picked.inner.px + 'px');
+    g.setProperty('--ex-btn-y', btnY.px + 'px');
+    g.setProperty('--ex-btn-x', btnX.px + 'px');
+
+    function item(cls, label, s) {
+      return '<span><span class="swatch ' + cls + '" aria-hidden="true"></span>' + label +
+        ': <code>' + s.name + '</code> (' + fmt(s.px) + 'px)</span>';
+    }
+    ex.legend.innerHTML =
+      item('sw-pad', 'Card padding', picked.pad) +
+      item('sw-gap', 'Between cards', picked.gap) +
+      item('sw-inner', 'Inside cards', picked.inner) +
+      '<span>Button padding: <code>' + btnY.name + '</code> / <code>' + btnX.name + '</code> (' +
+      fmt(btnY.px) + 'px ' + fmt(btnX.px) + 'px)</span>';
+  }
+  Object.keys(ex.selects).forEach(function (role) {
+    ex.selects[role].addEventListener('change', function () {
+      ex.chosen[role] = +ex.selects[role].value;
+      if (lastValid) renderExample(lastValid);
+    });
+  });
+  ex.overlay.addEventListener('change', function () {
+    ex.section.classList.toggle('show-spacing', ex.overlay.checked);
+  });
 
   function buildExport(data, fmtName) {
     var s = data.steps;
@@ -553,6 +827,15 @@
     }
   }
 
+  function checkGrid(data) {
+    var off = data.steps.filter(function (s) { return s.offGrid; });
+    if (!off.length) { els.gridNotice.hidden = true; return; }
+    els.gridNoticeText.textContent = off.length === 1
+      ? off[0].name + ' (' + fmt(off[0].px) + 'px) isn’t a multiple of ' + GRID + '.'
+      : off.length + ' values aren’t multiples of ' + GRID + ' (highlighted below).';
+    els.gridNotice.hidden = false;
+  }
+
   function update() {
     syncVisibility();
     var data = compute();
@@ -560,15 +843,20 @@
       lastValid = data;
       els.summary.textContent = data.summary;
       els.scale.classList.remove('is-stale');
+      ex.grid.style.opacity = '';
       els.staleNotice.hidden = true;
       els.copyBtn.disabled = false;
       checkDupes(data);
+      checkGrid(data);
       renderScale(data);
+      renderExample(data);
       renderExport();
     } else {
       els.scale.classList.add('is-stale');
+      ex.grid.style.opacity = '.45';
       els.staleNotice.hidden = !lastValid;
       els.dupeNotice.hidden = true;
+      els.gridNotice.hidden = true;
       els.copyBtn.disabled = true;
     }
   }
@@ -582,6 +870,12 @@
     els.stepsSection.hidden = type === 'custom';
     els.stepsOutput.textContent = els.stepsInput.value;
 
+    var naming = radioValue('naming');
+    els.namesField.hidden = naming !== 'custom';
+    var p = els.prefixInput.value.trim().replace(/-+$/, '');
+    var sample = naming === 'tshirt' ? 'md' : naming === 'custom' ? (lastRawNames[0] || 'xs') : '1';
+    els.prefixExample.textContent = p ? p + '-' + sample : sample;
+
     var b = base === 'custom' ? (parseNum(els.baseInput.value) || 'n') : +base;
     var seq = typeof b === 'number' ? [1, 2, 3, 4].map(function (k) { return fmt(b * k); }).join(', ') : 'n, 2n, 3n, 4n';
     els.typeHint.textContent =
@@ -594,9 +888,17 @@
   }
 
   // ---------- events ----------
-  els.form.addEventListener('input', update);
+  els.form.addEventListener('input', function (e) {
+    if (e.target === els.namesInput) namesEdited = true;
+    update();
+  });
   els.form.addEventListener('change', function (e) {
     if (e.target.name === 'base' && e.target.value === 'custom') els.baseInput.focus();
+    if (e.target.name === 'naming' && e.target.value === 'custom') {
+      // Start from the names currently shown so it's a quick edit, not a blank box
+      if (!namesEdited && lastRawNames.length) els.namesInput.value = lastRawNames.join(', ');
+      els.namesInput.focus();
+    }
     update();
   });
   chips.forEach(function (c) {
